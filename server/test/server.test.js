@@ -1,10 +1,20 @@
 var expect = require('expect');
 var request = require('supertest');
+var { ObjectID } = require('mongodb');
 
 var { app } = require('../server');
 var { Todo } = require('../models/Todo');
 
-const todos = [{ text: 'watch tv' }, { text: 'jogging' }]
+const todos = [
+    {
+        _id: new ObjectID(),
+        text: 'watch tv'
+    },
+    {
+        _id: new ObjectID(),
+        text: 'jogging'
+    }
+]
 
 //runs before each test case
 beforeEach((done) => {
@@ -31,7 +41,7 @@ describe('POST /todos', () => {
                     return done(err);
                 }
                 // making sure the posted data is added in db
-                Todo.find({text}).then((todos) => {
+                Todo.find({ text }).then((todos) => {
                     expect(todos.length).toBe(1);
                     expect(todos[0].text).toBe(text);
                     done();
@@ -57,14 +67,49 @@ describe('POST /todos', () => {
     });
 });
 
-describe('GET /todos', () => {
-    it('Should get all todos', (done) => {
-        request(app)
-            .get('/todos')
-            .expect(200)
-            .expect((res) => {
-                expect(res.body.todos.length).toBe(2)
-            })
-            .end(done)
+describe('GET', () => {
+    describe('/todos', () => {
+        it('Should get all todos', (done) => {
+            request(app)
+                .get('/todos')
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.todos.length).toBe(2)
+                })
+                .end(done)
+        })
+    })
+
+    describe('/todos/:id', () => {
+        it('Should get todo doc by id', (done) => {
+            var _id = todos[0]._id
+            request(app)
+                // convert object id to string 
+                // using toHexString()
+                .get(`/todos/${_id.toHexString()}`)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.todo.text).toBe(todos[0].text)
+                })
+                .end(done)
+        })
+
+        it('Should send (404) not found status when id is invalid', (done) => {
+            var _id = `${todos[0]._id.toHexString()}11`
+
+            request(app)
+                .get(`/todos/${_id}`)
+                .expect(404)
+                .end(done)
+        })
+
+        it('Should send (400) bad request status when id does not exist in db', (done) => {
+            var _id = new ObjectID().toHexString();
+
+            request(app)
+                .get(`/todos/${_id}`)
+                .expect(400)
+                .end(done)
+        })
     })
 })

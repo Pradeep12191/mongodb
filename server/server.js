@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const { ObjectID } = require('mongodb');
 
 var { mongoose } = require('./db/mongoose');
 var { Todo } = require('./models/Todo');
@@ -27,6 +28,25 @@ app.post('/todos', (req, res) => {
     })
 })
 
+app.get('/todos/:id', (req, res) => {
+    // need to check the id is valid
+    // handle if id does not exist in db
+    var _id = req.params['id'];
+    if(!ObjectID.isValid(_id)){
+        return res.status(404).send()
+    }
+    Todo.findById({_id}).then((todo) => {
+        if(!todo){
+            // respond with no body
+            return res.status(400).send()
+        }
+        res.send({todo})
+    }, (err) => {
+        res.status(400).send(err);
+    })
+    // res.send(req.params)
+})
+
 app.get('/todos', (req, res) => {
 
     new Promise((resolve) => {
@@ -36,12 +56,12 @@ app.get('/todos', (req, res) => {
     }).then(() => {
         return Todo.find()
     }).then((todos) => {
-        res.send({todos})
+        res.send({ todos })
     }, (err) => {
         res.status(400).send(err)
     })
-
 })
+
 
 app.listen(3000, () => {
     console.log('App listening to port 3000 ...')
