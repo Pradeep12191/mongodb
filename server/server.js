@@ -7,9 +7,11 @@ var { mongoose } = require('./db/mongoose');
 var { Todo } = require('./models/Todo');
 var { User } = require('./models/User');
 
+var port = process.env.PORT || 3000
+
 app.use(bodyParser.json());
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+    res.header("Access-Control-Allow-Origin", `https://still-dusk-98367.herokuapp.com/${port}`);
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next();
 })
@@ -63,8 +65,8 @@ app.get('/todos', (req, res) => {
 })
 
 
-app.listen(3000, () => {
-    console.log('App listening to port 3000 ...')
+app.listen(port, () => {
+    console.log(`App listening to port ${port} ...`)
 })
 
 module.exports.app = app;
