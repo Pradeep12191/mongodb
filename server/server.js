@@ -51,17 +51,24 @@ app.get('/todos/:id', (req, res) => {
 
 app.get('/todos', (req, res) => {
 
-    new Promise((resolve) => {
-        setTimeout(() => {
-            resolve()
-        }, 3000)
-    }).then(() => {
-        return Todo.find()
-    }).then((todos) => {
-        res.send({ todos })
-    }, (err) => {
+    Todo.find().then((todos) => {
+        res.send({todos})
+    }).catch((err) => {
         res.status(400).send(err)
     })
+
+    // new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //         resolve()
+    //     }, 3000)
+    // }).then(() => {
+    //     return Todo.find()
+    // }).then((todos) => {
+    //     res.send({todos})
+    // }).catch((err) => {
+    //     res.status(400).send(err)
+    // })
+
 })
 
 
