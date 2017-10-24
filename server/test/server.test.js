@@ -16,7 +16,7 @@ const todos = [
     }
 ]
 
-//runs before each test case
+// runs before each test case
 beforeEach((done) => {
     // clear the collection
     Todo.remove({}).then(() => {
@@ -111,5 +111,28 @@ describe('GET', () => {
                 .expect(400)
                 .end(done)
         })
+    })
+})
+
+describe('DELETE /todos/:id', () => {
+    it('should remove a todo', (done) => {
+        var _id = todos[0]._id
+        request(app).delete(`/todos/${_id}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo._id).toBe(_id.toHexString())
+            })
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+
+                Todo.findById(res.body.todo._id).then((todo) => {
+                    expect(todo).toNotExist();
+                    done();
+                }).catch((err) => {
+                    done(err);
+                })
+            })
     })
 })

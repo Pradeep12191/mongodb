@@ -1,6 +1,11 @@
 var mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://pradeep:pradeep123@ds125555.mlab.com:25555/todoapp', { useMongoClient: true });
+
+var mongoUri = process.env.MONGODB_URI;
+
+console.log(`Database uri is ${mongoUri}`)
+
+mongoose.connect(mongoUri, { useMongoClient: true });
 
 module.exports = { mongoose }
